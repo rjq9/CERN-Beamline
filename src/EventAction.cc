@@ -33,6 +33,7 @@
 namespace B1
 {
 
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 EventAction::EventAction(RunAction* runAction) : fRunAction(runAction) {}
@@ -41,6 +42,9 @@ EventAction::EventAction(RunAction* runAction) : fRunAction(runAction) {}
 
 void EventAction::BeginOfEventAction(const G4Event*)
 {
+  fTotalEMEnergy = 0.;
+  fPi0EMEnergy = 0.;
+  fChargedPions = 0.;
   fEdep = 0.;
 }
 
@@ -50,6 +54,9 @@ void EventAction::EndOfEventAction(const G4Event*)
 {
   // accumulate statistics in run action
   fRunAction->AddEdep(fEdep);
+  fRunAction->AddEMEnergy(fTotalEMEnergy);
+  fRunAction->AddPi0EMEnergy(fPi0EMEnergy);
+  fRunAction->judas(fChargedPions);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

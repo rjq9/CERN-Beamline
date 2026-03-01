@@ -47,6 +47,7 @@ SteppingAction::SteppingAction(EventAction* eventAction) : fEventAction(eventAct
 
 void SteppingAction::UserSteppingAction(const G4Step* step)
 {
+  // stupid boilerplate
   if (!fScoringVolume) {
     const auto detConstruction = static_cast<const DetectorConstruction*>(
       G4RunManager::GetRunManager()->GetUserDetectorConstruction());
@@ -61,8 +62,18 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   if (volume != fScoringVolume) return;
 
   // collect energy deposited in this step
-  G4double edepStep = step->GetTotalEnergyDeposit();
-  fEventAction->AddEdep(edepStep);
+  G4double measuredem = step->GetTotalEnergyDeposit();
+  // this is just leftover from the old code, but its kinda convennient so whatever
+  fEventAction->AddEdep(measuredem);
+
+  auto particlename = step->GetTrack()->GetDefinition()->GetParticleName();
+  if (particlename == "gamma" || particlename == "e-" || particlename == "e+") {
+    fEventAction->addEnergy(measuredem);
+  }
+  if ((particlename=="pi+" || particlename=="pi-")) {
+    fEventAction->judas(1);
+    G4cout << "WOAH" << G4endl;
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

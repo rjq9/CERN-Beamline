@@ -55,8 +55,20 @@ class RunAction : public G4UserRunAction
     void EndOfRunAction(const G4Run*) override;
 
     void AddEdep(G4double edep);
+    void AddEMEnergy(G4double e);
+    void AddPi0EMEnergy(G4double e);
+    void judas(G4double);
 
   private:
+    G4Accumulable<G4double> fSumEM =0.;
+    G4Accumulable<G4double> fSumEM2 =0.;
+
+    G4Accumulable<G4double> fSumPi0EM =0.;
+    G4Accumulable<G4double> fSumPi0EM2 =0.;
+
+    G4Accumulable<G4double> fSumChargedPi =0.;
+    G4Accumulable<G4double> fSumChargedPi2 = 0.;
+
     G4Accumulable<G4double> fEdep = 0.;
     G4Accumulable<G4double> fEdep2 = 0.;
 };

@@ -43,29 +43,23 @@ namespace B1
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-  // Get nist material manager
+  // Setup
   G4NistManager* nist = G4NistManager::Instance();
-
-  // Envelope parameters
-  //
-  G4double env_sizeXY = 20 * cm, env_sizeZ = 30 * cm;
-  G4Material* env_mat = nist->FindOrBuildMaterial("G4_WATER");
-
-  // Option to switch on/off checking of volumes overlaps
-  //
   G4bool checkOverlaps = true;
 
-  //
-  // World
-  //
-  G4double world_sizeXY = 1.2 * env_sizeXY;
-  G4double world_sizeZ = 1.2 * env_sizeZ;
+  // Parameters
+
+  //G4double env_sizeXY = 100 * cm, env_sizeZ = 300 * cm;
+  //G4Material* env_mat = nist->FindOrBuildMaterial("G4_AIR");
+
+  G4double world_sizeXY = 100 * cm;
+  G4double world_sizeZ = 300 * cm;
   G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
 
+  // Building stage
   auto solidWorld =
     new G4Box("World",  // its name
               0.5 * world_sizeXY, 0.5 * world_sizeXY, 0.5 * world_sizeZ);  // its size
-
   auto logicWorld = new G4LogicalVolume(solidWorld,  // its solid
                                         world_mat,  // its material
                                         "World");  // its name
@@ -78,17 +72,36 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                                      false,  // no boolean operation
                                      0,  // copy number
                                      checkOverlaps);  // overlaps checking
+  
 
-  //
-  // Envelope
-  //
-  auto solidEnv = new G4Box("Envelope",  // its name
+  // relative nuclear densities
+  // Pb : 0.0547; C : 0.175; H in CH2 : 0.026; C in : 0.013; Al : 0.100; Fe : 0.141
+  
+  G4double targetXY = 10 * cm;
+  G4double targetThickness = 10 * cm;
+  G4double targetDistance = 30 * cm;
+  G4Material* targetMaterial = nist->FindOrBuildMaterial("G4_C");
+  auto solidTarget = new G4Box("Target", targetXY, targetXY, targetThickness);
+  auto logicTarget = new G4LogicalVolume(solidTarget, targetMaterial, "Target");
+  new G4PVPlacement(nullptr, G4ThreeVector(0,0,targetDistance),logicTarget, "Target", logicWorld, false, 0, checkOverlaps);
+
+  G4double detectorXY = 10 * cm;
+  G4double detectorThickness = 10 * cm;
+  G4double detectorDistance = 50 * cm;
+  // ~ lead glass
+  G4Material* detectorMaterial = nist->FindOrBuildMaterial("G4_Pb");
+  auto solidDetector = new G4Box("Det", detectorXY, detectorXY, detectorThickness);
+  auto logicDetector = new G4LogicalVolume(solidDetector, detectorMaterial, "Det");
+  new G4PVPlacement(nullptr, G4ThreeVector(0,0,detectorDistance),logicDetector, "Det", logicWorld, false, 0, checkOverlaps);
+  
+  // this is what's actually yk detecting stuff
+  fScoringVolume = logicDetector;
+
+  /*autosolidEnv = new G4Box("Envelope",  // its name
                             0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.5 * env_sizeZ);  // its size
-
   auto logicEnv = new G4LogicalVolume(solidEnv,  // its solid
                                       env_mat,  // its material
                                       "Envelope");  // its name
-
   new G4PVPlacement(nullptr,  // no rotation
                     G4ThreeVector(),  // at (0,0,0)
                     logicEnv,  // its logical volume
@@ -97,15 +110,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                     false,  // no boolean operation
                     0,  // copy number
                     checkOverlaps);  // overlaps checking
-
-  //
-  // Shape 1
-  //
-  G4Material* shape1_mat = nist->FindOrBuildMaterial("G4_A-150_TISSUE");
+  G4Material* shape1_mat = nist->FindOrBuildMaterial("G4_C");
   G4ThreeVector pos1 = G4ThreeVector(0, 2 * cm, -7 * cm);
-
+  */
   // Conical section shape
-  G4double shape1_rmina = 0. * cm, shape1_rmaxa = 2. * cm;
+  /*G4double shape1_rmina = 0. * cm, shape1_rmaxa = 2. * cm;
   G4double shape1_rminb = 0. * cm, shape1_rmaxb = 4. * cm;
   G4double shape1_hz = 3. * cm;
   G4double shape1_phimin = 0. * deg, shape1_phimax = 360. * deg;
@@ -128,7 +137,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   //
   // Shape 2
   //
-  G4Material* shape2_mat = nist->FindOrBuildMaterial("G4_BONE_COMPACT_ICRU");
+  G4Material* shape2_mat = nist->FindOrBuildMaterial("G4_C");
   G4ThreeVector pos2 = G4ThreeVector(0, -1 * cm, 7 * cm);
 
   // Trapezoid shape
@@ -155,7 +164,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   // Set Shape2 as scoring volume
   //
-  fScoringVolume = logicShape2;
+  */
+  
+  
 
   //
   // always return the physical World

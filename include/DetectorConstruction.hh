@@ -37,6 +37,7 @@ class G4LogicalVolume;
 namespace B1
 {
 
+
 /// Detector construction class to define materials and geometry.
 
 class DetectorConstruction : public G4VUserDetectorConstruction

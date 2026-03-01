@@ -37,6 +37,7 @@ class G4Event;
 namespace B1
 {
 
+
 class RunAction;
 
 /// Event action class
@@ -50,11 +51,17 @@ class EventAction : public G4UserEventAction
     void BeginOfEventAction(const G4Event* event) override;
     void EndOfEventAction(const G4Event* event) override;
 
+    void addEnergy (G4double energy) {fTotalEMEnergy += energy;}
+    void addPi0Energy (G4double energy) {fPi0EMEnergy += energy;}
+    void judas (G4int count) {fChargedPions += count;}
     void AddEdep(G4double edep) { fEdep += edep; }
 
   private:
     RunAction* fRunAction = nullptr;
     G4double fEdep = 0.;
+    G4double fTotalEMEnergy;
+    G4double fPi0EMEnergy;
+    G4int    fChargedPions;
 };
 
 }  // namespace B1

@@ -6,7 +6,7 @@
 /gun/particle gamma
 /gun/energy 6 MeV
 #
-/run/printProgress 1000
+# /run/printProgress 1000
 /run/beamOn 10000
 #
 # proton 210 MeV 
