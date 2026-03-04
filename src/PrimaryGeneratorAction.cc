@@ -44,12 +44,13 @@ namespace B1
 PrimaryGeneratorAction::PrimaryGeneratorAction()
 {
   G4int n_particle = 1;
-  fParticleGun = new G4ParticleGun(n_particle);
+  fParticleGun = new G4ParticleGun();
 
   // default particle kinematic
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4String particleName;
   G4ParticleDefinition* particle = particleTable->FindParticle(particleName = "proton");
+  fParticleGun->SetNumberOfParticles(n_particle);
   fParticleGun->SetParticleDefinition(particle);
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
   fParticleGun->SetParticleEnergy(15. * GeV);

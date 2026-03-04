@@ -34,7 +34,6 @@ set(EXAMPLEB1_SCRIPTS
   exampleB1.out
   init_vis.mac
   run1.mac
-  run2.mac
   vis.mac
   )
 

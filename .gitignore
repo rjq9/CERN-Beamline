@@ -1,6 +1,7 @@
 .DS_Store
 build/*
 !build/.gitkeep
+!build/data_goes_here/.gitkeep
 /.vscode
 
 # Prerequisites

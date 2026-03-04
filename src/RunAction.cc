@@ -40,6 +40,10 @@
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 
+
+// for the stupid stuff
+#include "G4AnalysisManager.hh"
+
 namespace B1
 {
 
@@ -47,9 +51,15 @@ namespace B1
 
 RunAction::RunAction()
 {
-  // add new units for dose
-  //
 
+  // data analysis ... 
+  auto analysisManager = G4AnalysisManager::Instance();
+  analysisManager->SetVerboseLevel(1);
+
+  analysisManager->CreateNtuple("data","Data");
+  analysisManager->CreateNtupleDColumn("Total EM Energy (GeV)");
+  analysisManager->CreateNtupleDColumn("Pion Count");
+  analysisManager->FinishNtuple();
   // Register accumulable to the accumulable manager
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Register(fEdep);
@@ -63,7 +73,6 @@ RunAction::RunAction()
 
   accumulableManager->Register(fSumChargedPi);
   accumulableManager->Register(fSumChargedPi2);
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -76,6 +85,24 @@ void RunAction::BeginOfRunAction(const G4Run*)
   // reset accumulables to their initial values
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
+  // names the file
+  auto analysisManager = G4AnalysisManager::Instance();
+  auto det = static_cast<const DetectorConstruction*>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+  G4Material* currentmaterial = det->GetTargetMaterial();
+  if (currentmaterial == NULL) {
+    analysisManager->SetFileName("data_goes_here/beamOutput_default.root");
+  }
+  else {
+    analysisManager->SetFileName("data_goes_here/beamOutput_" + currentmaterial->GetName() + ".root");
+  }
+  analysisManager->Reset();
+  analysisManager->SetNtupleMerging(true);
+  analysisManager->OpenFile();
+
+  //analysisManager->CreateNtuple("data","Data");
+  //analysisManager->CreateNtupleDColumn("Total EM Energy");
+  //analysisManager->CreateNtupleDColumn("Pion Count");
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -89,8 +116,7 @@ void RunAction::EndOfRunAction(const G4Run* run)
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Merge();
 
-  // Compute dose = total energy deposit in a run and its variance
-
+  // not actually going to use RMS at this step - will export and do analysis later
   G4double edep = fEdep.GetValue();
   G4double edep2 = fEdep2.GetValue();
 
@@ -120,12 +146,6 @@ void RunAction::EndOfRunAction(const G4Run* run)
   else
     rms = 0.;
 
-  const auto detConstruction = static_cast<const DetectorConstruction*>(
-    G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-  G4double mass = detConstruction->GetScoringVolume()->GetMass();
-  G4double dose = edep / mass;
-  G4double rmsDose = rms / mass;
-
   // Run conditions
   //  note: There is no primary generator action object for "master"
   //        run manager for multi-threaded mode.
@@ -142,20 +162,33 @@ void RunAction::EndOfRunAction(const G4Run* run)
 
   // Print
   //
+  auto analysisManager = G4AnalysisManager::Instance();
+  analysisManager->Write();
+  analysisManager->CloseFile();
+
   if (IsMaster()) {
+    
+    
     G4cout << G4endl << "--------------------End of Global Run-----------------------";
+    G4cout << "Events: " << nofEvents << G4endl;
+    G4cout << "Average EM energy: " << meanem/GeV << "GeV" << G4endl;
+    G4cout << "Average Pi0 EM energy: " << meanpi/GeV << G4endl;
+    G4cout << "Average # of charged pions:" << meanpic << G4endl;   
+ 
+    // G4cout << "test" << rms << "&" << edep << G4endl;
   }
   else {
-    G4cout << G4endl << "--------------------End of Local Run------------------------";
+    ;
+    //G4cout << G4endl << "--------------------End of Local Run------------------------";
   }
 
   
-  G4cout << "Events: " << nofEvents << G4endl;
-  G4cout << "Total EM energy: " << meanem/GeV << G4endl;
-  G4cout << "Pi0 EM energy: " << meanpi/GeV << " +/- " << rmspi/GeV << " GeV" << G4endl;
-  G4cout << "Charged pion multiplicity: " << meanpic  << G4endl;
-    
+  /*G4cout << "Events: " << nofEvents << G4endl;
+  G4cout << "Average EM energy: " << meanem/GeV << G4endl;
+  G4cout << "Average Pi0 EM energy: " << meanpi/GeV << G4endl;
+  G4cout << "Average # of charged pions:" << meanpic << G4endl;   
  
+  G4cout << "test" << rms << "&" << edep << G4endl;*/
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

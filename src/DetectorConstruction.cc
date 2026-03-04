@@ -35,6 +35,8 @@
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Trd.hh"
+// needed to modify geometry
+#include "G4RunManager.hh"
 
 namespace B1
 {
@@ -46,7 +48,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Setup
   G4NistManager* nist = G4NistManager::Instance();
   G4bool checkOverlaps = true;
+  G4Material* targetMaterial = nist->FindOrBuildMaterial("G4_C");
+  nist->FindOrBuildMaterial("G4_POLYETHYLENE");
+  nist->FindOrBuildMaterial("G4_Al");
+  nist->FindOrBuildMaterial("G4_Pb");
+  nist->FindOrBuildMaterial("G4_Fe");
+  auto messenger = new G4GenericMessenger(this,
+                                     "/material/",
+                                     "Material control");
 
+  messenger->DeclareMethod("setTarget",
+                          &DetectorConstruction::settarget,
+                          "Set target material");
   // Parameters
 
   //G4double env_sizeXY = 100 * cm, env_sizeZ = 300 * cm;
@@ -80,16 +93,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4double targetXY = 10 * cm;
   G4double targetThickness = 10 * cm;
   G4double targetDistance = 30 * cm;
-  G4Material* targetMaterial = nist->FindOrBuildMaterial("G4_C");
+  
+
+  
   auto solidTarget = new G4Box("Target", targetXY, targetXY, targetThickness);
-  auto logicTarget = new G4LogicalVolume(solidTarget, targetMaterial, "Target");
+  logicTarget = new G4LogicalVolume(solidTarget, targetMaterial, "Target");
   new G4PVPlacement(nullptr, G4ThreeVector(0,0,targetDistance),logicTarget, "Target", logicWorld, false, 0, checkOverlaps);
 
   G4double detectorXY = 10 * cm;
   G4double detectorThickness = 10 * cm;
   G4double detectorDistance = 50 * cm;
   // ~ lead glass
-  G4Material* detectorMaterial = nist->FindOrBuildMaterial("G4_Pb");
+  G4Material* detectorMaterial = nist->FindOrBuildMaterial("G4_GLASS_LEAD");
   auto solidDetector = new G4Box("Det", detectorXY, detectorXY, detectorThickness);
   auto logicDetector = new G4LogicalVolume(solidDetector, detectorMaterial, "Det");
   new G4PVPlacement(nullptr, G4ThreeVector(0,0,detectorDistance),logicDetector, "Det", logicWorld, false, 0, checkOverlaps);
@@ -174,6 +189,31 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   return physWorld;
 }
 
+// updates target material. can be configured using /material/setTarget "target"
+
+void DetectorConstruction:: settarget(const G4String &name) {
+    auto nist = G4NistManager::Instance();
+    G4Material* newmaterial = G4Material::GetMaterial(name);
+    
+    if (newmaterial == NULL) {
+      G4Material* newmaterial = nist->FindOrBuildMaterial(name);
+    }
+    if (newmaterial == NULL) {
+      G4cout << "No material found with name: " << name << G4endl;
+    }
+    else {
+      if (logicTarget) {
+        G4cout << "Swapped target material to " << name << G4endl;
+        logicTarget->SetMaterial(newmaterial);
+        targetMaterial = newmaterial;
+        G4RunManager::GetRunManager()->GeometryHasBeenModified();
+      }
+      else {
+        G4cout << "No logical target found." << G4endl;
+      }
+    }
+    
+}
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 }  // namespace B1

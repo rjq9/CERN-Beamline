@@ -72,7 +72,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   }
   if ((particlename=="pi+" || particlename=="pi-")) {
     fEventAction->judas(1);
-    G4cout << "WOAH" << G4endl;
+    // G4cout << "WOAH" << G4endl;
   }
 }
 

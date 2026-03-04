@@ -29,6 +29,7 @@
 #include "EventAction.hh"
 
 #include "RunAction.hh"
+#include "G4AnalysisManager.hh"
 
 namespace B1
 {
@@ -52,11 +53,19 @@ void EventAction::BeginOfEventAction(const G4Event*)
 
 void EventAction::EndOfEventAction(const G4Event*)
 {
+  auto analysisManager = G4AnalysisManager::Instance();
   // accumulate statistics in run action
   fRunAction->AddEdep(fEdep);
   fRunAction->AddEMEnergy(fTotalEMEnergy);
   fRunAction->AddPi0EMEnergy(fPi0EMEnergy);
   fRunAction->judas(fChargedPions);
+  
+  // log information
+  // VERY IMPORTANT: the factor of 1000 is the GeV scaling factor. 
+  analysisManager->FillNtupleDColumn(0, fTotalEMEnergy/1000);
+  analysisManager->FillNtupleDColumn(1, fChargedPions);
+  analysisManager->AddNtupleRow();
+  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
