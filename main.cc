@@ -69,7 +69,7 @@ int main(int argc, char** argv)
   
   // Physics list
   auto physicsList = new FTFP_BERT;
-  physicsList->SetVerboseLevel(1);
+  physicsList->SetVerboseLevel(0);
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization

@@ -7,6 +7,7 @@
 
 class G4Track;
 
+
 class TrackingAction : public G4UserTrackingAction
 {
 public:
@@ -18,10 +19,18 @@ public:
 
     // Called after a track ends
     virtual void PostUserTrackingAction(const G4Track* track) override;
+
+    // upcoming pi 0 ID
+    static int nextID;
 };
 class Pi0Tag  : public G4VUserTrackInformation {
 public:
     bool IsPi0;
     bool IsPi0Descendant;
+    // used for uniqueness
+    int ID;
+
+    // used to ensure we log total counts just once
+    bool hasHitDetector=false;
 };
 #endif

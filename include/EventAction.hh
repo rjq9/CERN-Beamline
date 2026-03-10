@@ -31,6 +31,7 @@
 
 #include "G4UserEventAction.hh"
 #include "globals.hh"
+#include <set>
 
 class G4Event;
 
@@ -39,15 +40,21 @@ namespace B1
 
 
 class RunAction;
+// realistically this should be in a class but idrc
+// pi 0 logging feature: list of pi0 IDs
 
-/// Event action class
 
 class EventAction : public G4UserEventAction
 {
   public:
+  /// Event action class
+    std::set<int> Pi0IDs;
+    //std::pair<iterator, bool> insertID(int ID);
+    void clearSet();
+    bool isMember(int ID);
+
     EventAction(RunAction* runAction);
     ~EventAction() override = default;
-
     void BeginOfEventAction(const G4Event* event) override;
     void EndOfEventAction(const G4Event* event) override;
 
@@ -57,7 +64,7 @@ class EventAction : public G4UserEventAction
     void AddEdep(G4double edep) { fEdep += edep; }
     void addPion(G4int count) { fNeutralPions += count; }
     void addGamma(G4int count) {fGamma += count; }
-    
+
   private:
     RunAction* fRunAction = nullptr;
     G4double fEdep = 0.;

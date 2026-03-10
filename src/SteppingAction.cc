@@ -74,19 +74,39 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   auto particlename = step->GetTrack()->GetDefinition()->GetParticleName();
   auto tag = (Pi0Tag* )step->GetTrack() ->GetUserInformation();
   
-  if (tag && tag->IsPi0) {
-    fEventAction->addPion(1);
-  }
+  //if (tag && tag->IsPi0) {
+  //  fEventAction->addPion(1);
+  // }
+
   if (particlename == "gamma" || particlename == "e+" || particlename == "e-") {
     fEventAction->addEnergy(measuredem);
-    fEventAction->addGamma(1);
+    
+    if (tag && !tag->hasHitDetector) {
+      fEventAction->addGamma(1);
+      tag->hasHitDetector=true;
+      step->GetTrack()->SetUserInformation(tag);
+    }
     if (tag && tag->IsPi0Descendant) {
       fEventAction->addPi0Energy(measuredem);
+
+      // have we included this specific pi0?
+      int m = tag->ID;
+      //G4cout << std::to_string(m)<<  "<--" << G4endl;
+      if (m!= -1) {
+        auto result = (fEventAction->Pi0IDs).insert(m);
+        if (result.second) {
+          fEventAction->addPion(1);
+        }
+      }
     }
   }
-
+  // adds charged pions idk why i called it judas i think i was kinda pissed 
   if ((particlename=="pi+" || particlename=="pi-")) {
-    fEventAction->judas(1);
+    if (tag && !tag->hasHitDetector) {
+      fEventAction->judas(1);
+      tag->hasHitDetector = true;
+      step->GetTrack()->SetUserInformation(tag);
+    }
     // G4cout << "WOAH" << G4endl;
   }
 }

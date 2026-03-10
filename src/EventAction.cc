@@ -41,6 +41,15 @@ EventAction::EventAction(RunAction* runAction) : fRunAction(runAction) {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void EventAction::clearSet() {
+  Pi0IDs.clear();
+}
+
+bool EventAction::isMember(int ID) {
+  return (Pi0IDs.find(ID)!=Pi0IDs.end());
+}
+
+
 void EventAction::BeginOfEventAction(const G4Event*)
 {
   fTotalEMEnergy = 0.;
@@ -49,6 +58,9 @@ void EventAction::BeginOfEventAction(const G4Event*)
   fEdep = 0.;
   fNeutralPions = 0;
   fGamma = 0;
+
+  // reset set for next runthrough
+  clearSet();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -61,7 +73,10 @@ void EventAction::EndOfEventAction(const G4Event*)
   fRunAction->AddEMEnergy(fTotalEMEnergy);
   fRunAction->AddPi0EMEnergy(fPi0EMEnergy);
   fRunAction->judas(fChargedPions);
+
+  fNeutralPions = Pi0IDs.size();
   fRunAction->AddNeutralPion(fNeutralPions);
+
   fRunAction->AddGamma(fGamma);
   // log information
   /*

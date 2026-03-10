@@ -15,21 +15,21 @@
 /tracking/verbose 0
 
 
-/run/beamOn 50000
+/run/beamOn 500000
 
 /material/setTarget G4_POLYETHYLENE
 
-/run/beamOn 50000
+/run/beamOn 500000
 
 /material/setTarget G4_Al
 
 
-/run/beamOn 50000
+/run/beamOn 500000
 
 /material/setTarget G4_Fe
 
-/run/beamOn 50000
+/run/beamOn 500000
 
 /material/setTarget G4_Pb
 
-/run/beamOn 50000
+/run/beamOn 500000

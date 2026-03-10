@@ -57,7 +57,7 @@ RunAction::RunAction()
 
   analysisManager->CreateNtuple("data","Data");
   analysisManager->CreateNtupleDColumn("Total EM Energy (GeV)");
-  analysisManager->CreateNtupleDColumn("Total Photon Count");
+  analysisManager->CreateNtupleDColumn("Total EM Particle Count");
   analysisManager->CreateNtupleDColumn("Total PI 0 Energy");
   analysisManager->CreateNtupleDColumn("Total PI 0 Count");
   analysisManager->CreateNtupleDColumn("Total Charged Pi Count");
@@ -136,12 +136,13 @@ void RunAction::EndOfRunAction(const G4Run* run)
   G4double pi1 = fSumPi0EM.GetValue();
   G4double pi2 = fSumPi0EM2.GetValue();
 
-  G4int pic1 = fSumChargedPi.GetValue();
-  G4int pic2 = fSumChargedPi2.GetValue();
+  G4double pic1 = (G4double) fSumChargedPi.GetValue();
+  G4double pic2 = (G4double) fSumChargedPi2.GetValue();
 
-  G4int ga1 = fGamma.GetValue();
+  // cast out for averaging 
+  G4double ga1 = (G4double) fGamma.GetValue();
 
-  G4int np = fNeutralPions.GetValue();
+  G4double np = (G4double) fNeutralPions.GetValue();
 
   auto meanem   = em1 / nofEvents;
   
@@ -187,11 +188,11 @@ void RunAction::EndOfRunAction(const G4Run* run)
     
     G4cout << G4endl << "--------------------End of Global Run-----------------------";
     G4cout << "Events: " << nofEvents << G4endl;
-    G4cout << "Total energy: " << edep / (nofEvents*GeV) << "GeV" << G4endl;
+    G4cout << "Average allsource energy: " << edep / (nofEvents*GeV) << "GeV" << G4endl;
     G4cout << "Average EM energy: " << meanem/GeV << "GeV" << G4endl;
     G4cout << "Average Pi0 EM energy: " << meanpi/GeV << G4endl;
     G4cout << "Average # of charged pions: " << meanpic << G4endl;   
-    G4cout << "Average # of gamma rays: " << meangamma << G4endl;
+    G4cout << "Average # of EM particles (gamma/e+/e-): " << meangamma << G4endl;
     G4cout << "Average # of Pi0s: " << meanpicount << G4endl;
 
     // G4cout << "test" << rms << "&" << edep << G4endl;
@@ -238,7 +239,6 @@ void RunAction::AddNeutralPion(G4int e) {
 void RunAction::AddGamma(G4int e) {
   fGamma += e;
 }
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

@@ -1,8 +1,9 @@
+## NOTE FOR THE FOLKS AT CERN BEAMLINE
+
+todo: write this
+
 ## TODO
 
-need to have target thickness depend on kind of target
-
-implement particle tracking
 
 make histograms per-gamma-energy level, as opposed to per-total-deposited-level
 
