@@ -34,6 +34,7 @@
 
 #include "G4GenericMessenger.hh"
 #include "G4NistManager.hh"
+#include "G4Box.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
@@ -53,18 +54,22 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* Construct() override;
 
     G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
-     G4Material* GetTargetMaterial() const { return targetMaterial; }
+    G4Material* GetTargetMaterial() const { return targetMaterial; }
 
     void settarget(const G4String &name);
+    
 
     G4Material* targetMaterial = nullptr;
     G4LogicalVolume* logicTarget = nullptr;
+    G4Box* solidTarget = nullptr;
+    G4double targetThickness = 0;
+    
 
   protected:
     G4LogicalVolume* fScoringVolume = nullptr;
-    
-
     G4GenericMessenger* messenger = nullptr;
+    G4double getNuclearDensity(G4Material* material);
+    G4double lazyDensity(const G4String &material);
     
 };
 

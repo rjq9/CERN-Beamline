@@ -48,11 +48,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Setup
   G4NistManager* nist = G4NistManager::Instance();
   G4bool checkOverlaps = true;
-  G4Material* targetMaterial = nist->FindOrBuildMaterial("G4_C");
+  targetMaterial = nist->FindOrBuildMaterial("G4_C");
+  targetThickness = 1 * cm;
+
   nist->FindOrBuildMaterial("G4_POLYETHYLENE");
   nist->FindOrBuildMaterial("G4_Al");
   nist->FindOrBuildMaterial("G4_Pb");
   nist->FindOrBuildMaterial("G4_Fe");
+
   auto messenger = new G4GenericMessenger(this,
                                      "/material/",
                                      "Material control");
@@ -87,22 +90,22 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                                      checkOverlaps);  // overlaps checking
   
 
-  // relative nuclear densities
-  // Pb : 0.0547; C : 0.175; H in CH2 : 0.026; C in : 0.013; Al : 0.100; Fe : 0.141
+  
   
   G4double targetXY = 10 * cm;
-  G4double targetThickness = 10 * cm;
+  // defined earlier
+  // G4double targetThickness = 10 * cm;
   G4double targetDistance = 30 * cm;
   
 
   
-  auto solidTarget = new G4Box("Target", targetXY, targetXY, targetThickness);
+  solidTarget = new G4Box("Target", targetXY, targetXY, targetThickness);
   logicTarget = new G4LogicalVolume(solidTarget, targetMaterial, "Target");
   new G4PVPlacement(nullptr, G4ThreeVector(0,0,targetDistance),logicTarget, "Target", logicWorld, false, 0, checkOverlaps);
 
   G4double detectorXY = 10 * cm;
-  G4double detectorThickness = 10 * cm;
-  G4double detectorDistance = 50 * cm;
+  G4double detectorThickness = 20 * cm;
+  G4double detectorDistance = 70 * cm;
   // ~ lead glass
   G4Material* detectorMaterial = nist->FindOrBuildMaterial("G4_GLASS_LEAD");
   auto solidDetector = new G4Box("Det", detectorXY, detectorXY, detectorThickness);
@@ -194,7 +197,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 void DetectorConstruction:: settarget(const G4String &name) {
     auto nist = G4NistManager::Instance();
     G4Material* newmaterial = G4Material::GetMaterial(name);
-    
+    //G4String C_NAME = "G4_C";
+    //G4double C_DENS = lazyDensity(C_NAME);
     if (newmaterial == NULL) {
       G4Material* newmaterial = nist->FindOrBuildMaterial(name);
     }
@@ -205,7 +209,17 @@ void DetectorConstruction:: settarget(const G4String &name) {
       if (logicTarget) {
         G4cout << "Swapped target material to " << name << G4endl;
         logicTarget->SetMaterial(newmaterial);
+        //G4double oldDensity = getNuclearDensity(targetMaterial);
+        //G4double newDensity = lazyDensity(name);
+        //G4cout << "new density" << newDensity << G4endl;
+
         targetMaterial = newmaterial;
+
+        //G4double newThickness = 10 * cm * C_DENS / newDensity;
+ 
+        // calculates new thickness
+        //solidTarget->SetZHalfLength(newThickness);
+        //G4cout << "Set target thickness to: " << newThickness << G4endl;
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
       }
       else {
@@ -213,6 +227,44 @@ void DetectorConstruction:: settarget(const G4String &name) {
       }
     }
     
+}
+// scrapped 
+// relative nuclear densities
+  // Pb : 0.0547; C : 0.175; H in CH2 : 0.026; C in : 0.013; Al : 0.100; Fe : 0.141
+G4double DetectorConstruction :: lazyDensity (const G4String &name) {
+  if (name == "G4_C") {
+    return 0.175;
+  }
+  else if (name == "G4_POLYETHYLENE") {
+    // we can normalize by removing C
+    return 0.013;
+  }
+  else if (name == "G4_Al") {
+    return 0.100;
+  }
+  else if (name == "G4_Fe") {
+    return 0.141;
+  }
+  else if (name == "G4_Pb") {
+    return 0.0547;
+  }
+  else {
+    G4cout << "Unknown density" << G4endl;
+    return 0.175;
+  }
+}
+
+G4double DetectorConstruction ::getNuclearDensity(G4Material* material) {
+  G4double density = material->GetDensity();
+  G4double nelm = material->GetNumberOfElements();
+
+  G4double totalNucleonsPerMole = 0;
+  for (G4int i = 0; i < nelm; i++) {
+      const G4Element* element = material->GetElement(i);
+      G4double fracMass = material->GetFractionVector()[i];
+      totalNucleonsPerMole += mole * fracMass / element->GetA(); 
+  }
+  return density / totalNucleonsPerMole; 
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

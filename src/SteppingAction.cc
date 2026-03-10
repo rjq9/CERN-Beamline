@@ -30,7 +30,7 @@
 
 #include "DetectorConstruction.hh"
 #include "EventAction.hh"
-
+#include "TrackingAction.hh"
 #include "G4Event.hh"
 #include "G4LogicalVolume.hh"
 #include "G4RunManager.hh"
@@ -58,6 +58,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   G4LogicalVolume* volume =
     step->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume();
 
+
+  
   // check if we are in scoring volume
   if (volume != fScoringVolume) return;
 
@@ -66,10 +68,23 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   // this is just leftover from the old code, but its kinda convennient so whatever
   fEventAction->AddEdep(measuredem);
 
+  //auto particlename = step->GetTrack()->GetDefinition()->GetParticleName();
+  //auto tag = (Pi0Tag* )step->GetTrack() ->GetUserInformation();
+  
   auto particlename = step->GetTrack()->GetDefinition()->GetParticleName();
-  if (particlename == "gamma" || particlename == "e-" || particlename == "e+") {
-    fEventAction->addEnergy(measuredem);
+  auto tag = (Pi0Tag* )step->GetTrack() ->GetUserInformation();
+  
+  if (tag && tag->IsPi0) {
+    fEventAction->addPion(1);
   }
+  if (particlename == "gamma" || particlename == "e+" || particlename == "e-") {
+    fEventAction->addEnergy(measuredem);
+    fEventAction->addGamma(1);
+    if (tag && tag->IsPi0Descendant) {
+      fEventAction->addPi0Energy(measuredem);
+    }
+  }
+
   if ((particlename=="pi+" || particlename=="pi-")) {
     fEventAction->judas(1);
     // G4cout << "WOAH" << G4endl;

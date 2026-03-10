@@ -51,15 +51,21 @@ namespace B1
 
 RunAction::RunAction()
 {
-
   // data analysis ... 
   auto analysisManager = G4AnalysisManager::Instance();
   analysisManager->SetVerboseLevel(1);
 
   analysisManager->CreateNtuple("data","Data");
   analysisManager->CreateNtupleDColumn("Total EM Energy (GeV)");
-  analysisManager->CreateNtupleDColumn("Pion Count");
+  analysisManager->CreateNtupleDColumn("Total Photon Count");
+  analysisManager->CreateNtupleDColumn("Total PI 0 Energy");
+  analysisManager->CreateNtupleDColumn("Total PI 0 Count");
+  analysisManager->CreateNtupleDColumn("Total Charged Pi Count");
   analysisManager->FinishNtuple();
+
+  // load current time to differentiate datasets
+  run_start_time = std::time(nullptr);
+
   // Register accumulable to the accumulable manager
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Register(fEdep);
@@ -73,6 +79,10 @@ RunAction::RunAction()
 
   accumulableManager->Register(fSumChargedPi);
   accumulableManager->Register(fSumChargedPi2);
+
+  accumulableManager->Register(fNeutralPions);
+
+  accumulableManager->Register(fGamma);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -90,10 +100,10 @@ void RunAction::BeginOfRunAction(const G4Run*)
   auto det = static_cast<const DetectorConstruction*>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
   G4Material* currentmaterial = det->GetTargetMaterial();
   if (currentmaterial == NULL) {
-    analysisManager->SetFileName("data_goes_here/beamOutput_default.root");
+    analysisManager->SetFileName("data_goes_here/" + std::to_string(run_start_time) + "beamOutput_default.root");
   }
   else {
-    analysisManager->SetFileName("data_goes_here/beamOutput_" + currentmaterial->GetName() + ".root");
+    analysisManager->SetFileName("data_goes_here/" + std::to_string(run_start_time) + "beamOutput_" + currentmaterial->GetName() + ".root");
   }
   analysisManager->Reset();
   analysisManager->SetNtupleMerging(true);
@@ -129,6 +139,10 @@ void RunAction::EndOfRunAction(const G4Run* run)
   G4int pic1 = fSumChargedPi.GetValue();
   G4int pic2 = fSumChargedPi2.GetValue();
 
+  G4int ga1 = fGamma.GetValue();
+
+  G4int np = fNeutralPions.GetValue();
+
   auto meanem   = em1 / nofEvents;
   
   auto rmsem    = std::sqrt(std::abs(em2/nofEvents - meanem*meanem));
@@ -138,8 +152,10 @@ void RunAction::EndOfRunAction(const G4Run* run)
 
   auto meanpic = pic1 / nofEvents;
   auto rmspic  = std::sqrt(std::abs(pic2/nofEvents - meanpic * meanpic));
+  
+  auto meangamma = ga1 / nofEvents;
 
-
+  auto meanpicount = np / nofEvents;
   G4double rms = edep2 - edep * edep / nofEvents;
   if (rms > 0.)
     rms = std::sqrt(rms);
@@ -171,10 +187,13 @@ void RunAction::EndOfRunAction(const G4Run* run)
     
     G4cout << G4endl << "--------------------End of Global Run-----------------------";
     G4cout << "Events: " << nofEvents << G4endl;
+    G4cout << "Total energy: " << edep / (nofEvents*GeV) << "GeV" << G4endl;
     G4cout << "Average EM energy: " << meanem/GeV << "GeV" << G4endl;
     G4cout << "Average Pi0 EM energy: " << meanpi/GeV << G4endl;
-    G4cout << "Average # of charged pions:" << meanpic << G4endl;   
- 
+    G4cout << "Average # of charged pions: " << meanpic << G4endl;   
+    G4cout << "Average # of gamma rays: " << meangamma << G4endl;
+    G4cout << "Average # of Pi0s: " << meanpicount << G4endl;
+
     // G4cout << "test" << rms << "&" << edep << G4endl;
   }
   else {
@@ -212,6 +231,15 @@ void RunAction::judas(G4double n) {
     fSumChargedPi += n;
     fSumChargedPi2 += n*n;
 }
+
+void RunAction::AddNeutralPion(G4int e) {
+  fNeutralPions += e;
+}
+void RunAction::AddGamma(G4int e) {
+  fGamma += e;
+}
+
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 }  // namespace B1

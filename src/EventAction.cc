@@ -47,6 +47,8 @@ void EventAction::BeginOfEventAction(const G4Event*)
   fPi0EMEnergy = 0.;
   fChargedPions = 0.;
   fEdep = 0.;
+  fNeutralPions = 0;
+  fGamma = 0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -59,13 +61,22 @@ void EventAction::EndOfEventAction(const G4Event*)
   fRunAction->AddEMEnergy(fTotalEMEnergy);
   fRunAction->AddPi0EMEnergy(fPi0EMEnergy);
   fRunAction->judas(fChargedPions);
-  
+  fRunAction->AddNeutralPion(fNeutralPions);
+  fRunAction->AddGamma(fGamma);
   // log information
+  /*
+  analysisManager->CreateNtupleDColumn("Total EM Energy (GeV)");
+  analysisManager->CreateNtupleDColumn("Total Photon Count");
+  analysisManager->CreateNtupleDColumn("Total PI 0 Energy");
+  analysisManager->CreateNtupleDColumn("Total PI 0 Count");
+  analysisManager->CreateNtupleDColumn("Total Charged Pi Count");*/
   // VERY IMPORTANT: the factor of 1000 is the GeV scaling factor. 
   analysisManager->FillNtupleDColumn(0, fTotalEMEnergy/1000);
-  analysisManager->FillNtupleDColumn(1, fChargedPions);
+  analysisManager->FillNtupleDColumn(1, fGamma);
+  analysisManager->FillNtupleDColumn(2, fPi0EMEnergy);
+  analysisManager->FillNtupleDColumn(3,fNeutralPions);
+  analysisManager->FillNtupleDColumn(4,fChargedPions);
   analysisManager->AddNtupleRow();
-  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

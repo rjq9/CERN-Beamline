@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   //
   // Detector construction
   runManager->SetUserInitialization(new DetectorConstruction());
-
+  
   // Physics list
   auto physicsList = new FTFP_BERT;
   physicsList->SetVerboseLevel(1);
