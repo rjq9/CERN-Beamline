@@ -64,6 +64,7 @@ class EventAction : public G4UserEventAction
     void AddEdep(G4double edep) { fEdep += edep; }
     void addPion(G4int count) { fNeutralPions += count; }
     void addGamma(G4int count) {fGamma += count; }
+    void addInteraction(G4int count) {fInteractions+= count;}
 
   private:
     RunAction* fRunAction = nullptr;
@@ -73,6 +74,7 @@ class EventAction : public G4UserEventAction
     G4int    fChargedPions;
     G4int    fNeutralPions;
     G4int    fGamma;
+    G4int    fInteractions;
 };
 
 }  // namespace B1

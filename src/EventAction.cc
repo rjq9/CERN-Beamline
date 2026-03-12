@@ -58,7 +58,7 @@ void EventAction::BeginOfEventAction(const G4Event*)
   fEdep = 0.;
   fNeutralPions = 0;
   fGamma = 0;
-
+  fInteractions = 0;
   // reset set for next runthrough
   clearSet();
 }
@@ -78,6 +78,7 @@ void EventAction::EndOfEventAction(const G4Event*)
   fRunAction->AddNeutralPion(fNeutralPions);
 
   fRunAction->AddGamma(fGamma);
+  fRunAction->AddInteraction(fInteractions);
   // log information
   /*
   analysisManager->CreateNtupleDColumn("Total EM Energy (GeV)");

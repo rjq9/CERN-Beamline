@@ -3,7 +3,9 @@
 #include "G4PionZero.hh"
 #include "G4VUserTrackInformation.hh"
 #include "G4TrackingManager.hh"
-// #include "EventAction.hh"
+#include "G4PionPlus.hh"
+#include "G4PionMinus.hh"
+//#include "EventAction.hh"
 
 int TrackingAction::nextID = 0;
 
@@ -20,9 +22,11 @@ void TrackingAction::PreUserTrackingAction(const G4Track* track) {
     auto tag = new Pi0Tag();
 
     if (og_tag) {
+        // prob a better way of doing this, idk
         tag->IsPi0Descendant = og_tag->IsPi0Descendant;
         tag->ID = og_tag->ID;
         tag->IsPi0 = og_tag->IsPi0;
+        tag->producedInTarget = og_tag->producedInTarget;
     }
     else {
         // defaults
@@ -30,8 +34,15 @@ void TrackingAction::PreUserTrackingAction(const G4Track* track) {
         // for when it's irrelevant
         tag->ID = -1;
         tag->IsPi0Descendant = false;
+        auto place = track->GetLogicalVolumeAtVertex()->GetName();
+        // tag->producedInTarget = (place=="Target")
+        tag->producedInTarget = (place == "Target");
+        
     }
-    if(track->GetDefinition() == G4PionZero::PionZero()) {
+    
+    // log the position
+    auto def = track->GetDefinition();
+    if(def == G4PionZero::PionZero()) {
         tag->IsPi0 = true;
         tag->IsPi0Descendant = true;
         tag->ID = nextID;
@@ -53,6 +64,8 @@ void TrackingAction::PostUserTrackingAction(const G4Track* track) {
             auto tag = new Pi0Tag();
             tag->IsPi0Descendant = q;
             tag->ID = parent_tag->ID;
+            tag->producedInTarget = parent_tag->producedInTarget;
+            // propagate properties of the pi0 to descendants
             sec->SetUserInformation(tag);
         }
     }

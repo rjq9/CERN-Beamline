@@ -1,0 +1,10 @@
+/run/initialize
+
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+/material/setTarget G4_H
+
+/run/beamOn 5000

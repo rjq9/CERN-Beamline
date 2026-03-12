@@ -54,6 +54,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* Construct() override;
 
     G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
+    G4LogicalVolume* GetTargetVolume() const {return fTargetVolume;}
     G4Material* GetTargetMaterial() const { return targetMaterial; }
 
     void settarget(const G4String &name);
@@ -67,6 +68,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
   protected:
     G4LogicalVolume* fScoringVolume = nullptr;
+    G4LogicalVolume* fTargetVolume = nullptr;
+    
     G4GenericMessenger* messenger = nullptr;
     G4double getNuclearDensity(G4Material* material);
     G4double lazyDensity(const G4String &material);

@@ -14,22 +14,28 @@
 /event/verbose 0
 /tracking/verbose 0
 
-
-/run/beamOn 500000
+/material/setTarget G4_C
+/run/beamOn 10000
 
 /material/setTarget G4_POLYETHYLENE
 
-/run/beamOn 500000
+/run/beamOn 10000
 
 /material/setTarget G4_Al
 
-
-/run/beamOn 500000
+/run/beamOn 10000
 
 /material/setTarget G4_Fe
 
-/run/beamOn 500000
+/run/beamOn 10000
 
 /material/setTarget G4_Pb
 
-/run/beamOn 500000
+/run/beamOn 10000
+
+/material/setTarget G4_lH2
+/run/beamOn 10000
+
+/material/setTarget G4_Galactic
+
+/run/beamOn 10000

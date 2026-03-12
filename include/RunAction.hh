@@ -60,6 +60,7 @@ class RunAction : public G4UserRunAction
     void judas(G4double);
     void AddNeutralPion(G4int e);
     void AddGamma(G4int e);
+    void AddInteraction(G4int e);
 
   private:
     G4Accumulable<G4double> fSumEM =0.;
@@ -77,6 +78,8 @@ class RunAction : public G4UserRunAction
     G4Accumulable<G4int> fNeutralPions = 0;
 
     G4Accumulable<G4int> fGamma = 0;
+
+    G4Accumulable<G4int> fInteractions = 0;
 
     std::time_t run_start_time;
 };

@@ -35,8 +35,11 @@
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Trd.hh"
+#include "G4Proton.hh"
 // needed to modify geometry
 #include "G4RunManager.hh"
+// needed to log cross sections ...
+#include "G4HadronicProcessStore.hh"
 
 namespace B1
 {
@@ -48,13 +51,23 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Setup
   G4NistManager* nist = G4NistManager::Instance();
   G4bool checkOverlaps = true;
-  targetMaterial = nist->FindOrBuildMaterial("G4_C");
-  targetThickness = 1 * cm;
-
+  
+  targetThickness = 10 * cm;
+  nist->FindOrBuildMaterial("G4_C");
   nist->FindOrBuildMaterial("G4_POLYETHYLENE");
   nist->FindOrBuildMaterial("G4_Al");
   nist->FindOrBuildMaterial("G4_Pb");
   nist->FindOrBuildMaterial("G4_Fe");
+  nist->FindOrBuildMaterial("G4_H");
+  nist->FindOrBuildMaterial("G4_lH2");
+
+  nist->FindOrBuildMaterial("G4_AIR");
+  // vacuum
+  nist->FindOrBuildMaterial("G4_Galactic");
+  // lead glass
+  nist->FindOrBuildMaterial("G4_GLASS_LEAD");
+
+  targetMaterial = nist->FindOrBuildMaterial("G4_Galactic");
 
   auto messenger = new G4GenericMessenger(this,
                                      "/material/",
@@ -103,8 +116,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   logicTarget = new G4LogicalVolume(solidTarget, targetMaterial, "Target");
   new G4PVPlacement(nullptr, G4ThreeVector(0,0,targetDistance),logicTarget, "Target", logicWorld, false, 0, checkOverlaps);
 
-  G4double detectorXY = 10 * cm;
-  G4double detectorThickness = 20 * cm;
+  G4double detectorXY = 50 * cm;
+  G4double detectorThickness = 10 * cm;
   G4double detectorDistance = 70 * cm;
   // ~ lead glass
   G4Material* detectorMaterial = nist->FindOrBuildMaterial("G4_GLASS_LEAD");
@@ -114,7 +127,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   // this is what's actually yk detecting stuff
   fScoringVolume = logicDetector;
-
+  fTargetVolume = logicTarget;
   /*autosolidEnv = new G4Box("Envelope",  // its name
                             0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.5 * env_sizeZ);  // its size
   auto logicEnv = new G4LogicalVolume(solidEnv,  // its solid
@@ -221,6 +234,13 @@ void DetectorConstruction:: settarget(const G4String &name) {
         //solidTarget->SetZHalfLength(newThickness);
         //G4cout << "Set target thickness to: " << newThickness << G4endl;
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
+
+        // log new cross sections
+        auto store = G4HadronicProcessStore::Instance();
+        G4double cross_section = store->GetInelasticCrossSectionPerVolume(G4Proton::Definition(), 10.*GeV, newmaterial);
+
+        G4cout << "For your records, here's the cross section (units / cm):" << cross_section / cm << G4endl;
+        G4cout << "BETA: Nuclear Density of material:" << getNuclearDensity(newmaterial) << G4endl;
       }
       else {
         G4cout << "No logical target found." << G4endl;

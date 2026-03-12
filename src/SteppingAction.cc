@@ -52,6 +52,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     const auto detConstruction = static_cast<const DetectorConstruction*>(
       G4RunManager::GetRunManager()->GetUserDetectorConstruction());
     fScoringVolume = detConstruction->GetScoringVolume();
+
+    fTargetVolume = detConstruction->GetTargetVolume();
   }
 
   // get volume of the current step
@@ -61,24 +63,69 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
   
   // check if we are in scoring volume
-  if (volume != fScoringVolume) return;
+  if (volume != fScoringVolume && volume != fTargetVolume) return;
 
-  // collect energy deposited in this step
-  G4double measuredem = step->GetTotalEnergyDeposit();
-  // this is just leftover from the old code, but its kinda convennient so whatever
-  fEventAction->AddEdep(measuredem);
+  auto track = step->GetTrack();
+  auto process = step->GetPostStepPoint()->GetProcessDefinedStep();
+  auto tag = (Pi0Tag* ) track ->GetUserInformation();
+  if (process && process->GetProcessName() == "protonInelastic") {
+    
+    if (track->GetTrackID() == 1 && volume == fTargetVolume) {
+      fEventAction->addInteraction(1);
+    }
+  }
 
   //auto particlename = step->GetTrack()->GetDefinition()->GetParticleName();
   //auto tag = (Pi0Tag* )step->GetTrack() ->GetUserInformation();
   
-  auto particlename = step->GetTrack()->GetDefinition()->GetParticleName();
-  auto tag = (Pi0Tag* )step->GetTrack() ->GetUserInformation();
+  auto particlename = track->GetDefinition()->GetParticleName();
   
+  
+  // collect energy deposited in this step
+  G4double measuredem = step->GetTotalEnergyDeposit();
+
+
+  // this is just leftover from the old code, but its kinda convennient so whatever
+  fEventAction->AddEdep(measuredem);
+
+  if ((particlename == "gamma" || particlename == "e+" || particlename == "e-") && tag->producedInTarget) {
+    fEventAction->addEnergy(measuredem);
+  }
+
+  if (tag->IsPi0Descendant && tag->producedInTarget) {
+    fEventAction->addPi0Energy(measuredem);
+  }
+
+  if (particlename == "gamma" && tag->IsPi0Descendant && tag->producedInTarget) {
+    int m = tag->ID;
+    //G4cout << std::to_string(m)<<  "<--" << G4endl;
+    if (m!= -1) {
+      auto result = (fEventAction->Pi0IDs).insert(m);
+     
+      if (result.second) {
+        ;
+        fEventAction->addPion(1);
+        // G4cout << "hey: " << std::to_string (m) << G4endl;
+      }
+      tag->hasHitDetector = true;
+      step->GetTrack()->SetUserInformation(tag);
+    }
+  }
+
+  if ((particlename=="pi+" || particlename=="pi-") && tag && !tag->hasHitDetector && tag->producedInTarget) {
+    fEventAction->judas(1);
+    tag->hasHitDetector = true;
+    step->GetTrack()->SetUserInformation(tag);
+  }
+
+  if ((particlename == "gamma" || particlename == "e+" || particlename == "e-") && !tag->hasHitDetector) {
+    fEventAction->addGamma(1);
+    tag->hasHitDetector=true;
+  }
   //if (tag && tag->IsPi0) {
   //  fEventAction->addPion(1);
   // }
-
-  if (particlename == "gamma" || particlename == "e+" || particlename == "e-") {
+  /*if (particlename == "gamma" || particlename == "e+" || particlename == "e-") {
     fEventAction->addEnergy(measuredem);
     
     if (tag && !tag->hasHitDetector) {
@@ -86,6 +133,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       tag->hasHitDetector=true;
       step->GetTrack()->SetUserInformation(tag);
     }
+
     if (tag && tag->IsPi0Descendant) {
       fEventAction->addPi0Energy(measuredem);
 
@@ -108,7 +156,8 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       step->GetTrack()->SetUserInformation(tag);
     }
     // G4cout << "WOAH" << G4endl;
-  }
+  }*/
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

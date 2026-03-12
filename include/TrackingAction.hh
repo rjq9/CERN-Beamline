@@ -32,5 +32,9 @@ public:
 
     // used to ensure we log total counts just once
     bool hasHitDetector=false;
+    // ensure we only count pions produced in the target
+    // this only affects the pi 0 / charged pi count, not the EM, because showers might produce indirect pi0s
+    // those matter for totals but not for pi 0 prod
+    bool producedInTarget = false;
 };
 #endif

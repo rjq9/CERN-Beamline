@@ -83,6 +83,8 @@ RunAction::RunAction()
   accumulableManager->Register(fNeutralPions);
 
   accumulableManager->Register(fGamma);
+
+  accumulableManager->Register(fInteractions);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -144,6 +146,8 @@ void RunAction::EndOfRunAction(const G4Run* run)
 
   G4double np = (G4double) fNeutralPions.GetValue();
 
+  G4double interactioncount = (G4double) fInteractions.GetValue();
+
   auto meanem   = em1 / nofEvents;
   
   auto rmsem    = std::sqrt(std::abs(em2/nofEvents - meanem*meanem));
@@ -194,7 +198,7 @@ void RunAction::EndOfRunAction(const G4Run* run)
     G4cout << "Average # of charged pions: " << meanpic << G4endl;   
     G4cout << "Average # of EM particles (gamma/e+/e-): " << meangamma << G4endl;
     G4cout << "Average # of Pi0s: " << meanpicount << G4endl;
-
+    G4cout << "BETA: Interaction Count: " << interactioncount << G4endl;
     // G4cout << "test" << rms << "&" << edep << G4endl;
   }
   else {
@@ -238,6 +242,9 @@ void RunAction::AddNeutralPion(G4int e) {
 }
 void RunAction::AddGamma(G4int e) {
   fGamma += e;
+}
+void RunAction::AddInteraction(G4int e) {
+  fInteractions += e;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
