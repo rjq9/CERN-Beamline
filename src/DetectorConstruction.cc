@@ -52,7 +52,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4NistManager* nist = G4NistManager::Instance();
   G4bool checkOverlaps = true;
   
-  targetThickness = 10 * cm;
+  targetThickness = 2.5 * cm;
   nist->FindOrBuildMaterial("G4_C");
   nist->FindOrBuildMaterial("G4_POLYETHYLENE");
   nist->FindOrBuildMaterial("G4_Al");

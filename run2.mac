@@ -6,11 +6,11 @@
 /tracking/verbose 0
 
 /material/setTarget lHe
-/run/beamOn 10000
+/run/beamOn 50000
 
 /material/setTarget lN
-/run/beamOn 10000
+/run/beamOn 50000
 
 /material/setTarget lO
 
-/run/beamOn 10000
+/run/beamOn 50000

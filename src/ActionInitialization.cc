@@ -33,7 +33,6 @@
 #include "RunAction.hh"
 #include "SteppingAction.hh"
 #include "TrackingAction.hh"
-#include "StackingAction.hh"
 
 namespace B1
 {
@@ -62,7 +61,7 @@ void ActionInitialization::Build() const
 
   SetUserAction(new TrackingAction());
 // might use later
-  SetUserAction(new StackingAction());
+  // SetUserAction(new StackingAction());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
