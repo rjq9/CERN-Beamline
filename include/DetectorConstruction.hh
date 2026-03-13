@@ -73,6 +73,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4GenericMessenger* messenger = nullptr;
     G4double getNuclearDensity(G4Material* material);
     G4double lazyDensity(const G4String &material);
+    G4double getThickness(G4Material* material);
     
 };
 

@@ -58,6 +58,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   nist->FindOrBuildMaterial("G4_Al");
   nist->FindOrBuildMaterial("G4_Pb");
   nist->FindOrBuildMaterial("G4_Fe");
+
   nist->FindOrBuildMaterial("G4_H");
   nist->FindOrBuildMaterial("G4_lH2");
 
@@ -66,7 +67,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   nist->FindOrBuildMaterial("G4_Galactic");
   // lead glass
   nist->FindOrBuildMaterial("G4_GLASS_LEAD");
+  G4Material* lHe = new G4Material("lHe", 2., 4. * g / mole, 1 * g / cm3);
+  G4Material* lO = new G4Material("lO", 8., 16. * g / mole, 1 * g / cm3);
+  G4Material* lN = new G4Material("lN", 7., 14. * g / mole, 1 * g / cm3);
 
+  //targetMaterial = lHe;
   targetMaterial = nist->FindOrBuildMaterial("G4_Galactic");
 
   auto messenger = new G4GenericMessenger(this,
@@ -238,15 +243,33 @@ void DetectorConstruction:: settarget(const G4String &name) {
         // log new cross sections
         auto store = G4HadronicProcessStore::Instance();
         G4double cross_section = store->GetInelasticCrossSectionPerVolume(G4Proton::Definition(), 10.*GeV, newmaterial);
-
-        G4cout << "For your records, here's the cross section (units / cm):" << cross_section / cm << G4endl;
+        
+        //G4cout << "For your records, here's the cross section (units / cm):" << cross_section / cm << G4endl;
         G4cout << "BETA: Nuclear Density of material:" << getNuclearDensity(newmaterial) << G4endl;
+        G4cout << "BETA: Recommended Target Thickness:" << getThickness(newmaterial) << G4endl;
+        // Logging
+
+        G4cout << " --- Elemental Cross Sections --- " << G4endl;
+
+        int nelm = newmaterial->GetNumberOfElements();
+
+        for (int i=0; i<nelm;i++) {
+          const G4Element* mat_element = newmaterial->GetElement(i);
+          G4double elem_cs = store->GetInelasticCrossSectionPerAtom(G4Proton::Definition(), 10.*GeV, mat_element, newmaterial);
+          G4cout << mat_element->GetName() << ": " << elem_cs/barn << G4endl;
+        }
       }
       else {
         G4cout << "No logical target found." << G4endl;
       }
     }
     
+}
+G4double  DetectorConstruction :: getThickness(G4Material *material) {
+  G4double lamb = material->GetNuclearInterLength();
+  G4double dens = material->GetDensity();
+  // G4cout << "lamb: " << lamb << "dens: " << dens << G4endl;
+  return 0.25 * lamb / dens;
 }
 // scrapped 
 // relative nuclear densities

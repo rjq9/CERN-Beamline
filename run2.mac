@@ -5,6 +5,12 @@
 /event/verbose 0
 /tracking/verbose 0
 
-/material/setTarget G4_H
+/material/setTarget lHe
+/run/beamOn 10000
 
-/run/beamOn 5000
+/material/setTarget lN
+/run/beamOn 10000
+
+/material/setTarget lO
+
+/run/beamOn 10000
